@@ -2,6 +2,9 @@
   "name": "ecies-ed25519-js",
   "version": "0.0.1",
   "main": "index.js",
+  "browser": "dist/index.min.js",
+  "module": "dist/index.es.js",
+  "moduleNameIife": "eciesEd25519",
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -38,7 +41,6 @@
   },
   "dependencies": {
     "@iota/crypto.js": "^2.0.0-rc.2",
-    "@iota/util.js": "^2.0.0-rc.2",
     "@noble/ed25519": "^1.7.3",
     "crypto-js": "^4.1.1",
     "futoin-hkdf": "^1.5.2"

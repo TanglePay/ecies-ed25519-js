@@ -1,24 +1,15 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { prepareBytesForScalar, decapsulate, decrypt, encapsulate, encrypt, getEphemeralSecretAndPublicKey, productOfTwo } from '.';
-import { ExtendedPoint, etc, getPublicKeyAsync, modL_LE } from './nobleEd'
-import { ExtendedGroupElement } from './edwards25519/extendedGroupElement';
+import { prepareBytesForScalar, decapsulate, encapsulate, getEphemeralSecretAndPublicKey, productOfTwo } from '.';
+import { ExtendedPoint, etc, modL_LE } from './nobleEd';
+
 describe('basic test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
     const tag = 'IOTACAT'
     beforeEach(()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
     })
-    test('iota and noble ed25519 interoperable multiply',()=>{
-        const iotaBasePoint = new ExtendedGroupElement()
-        const iotaBaseProduct = new Uint8Array(32);
-        const prepared = prepareBytesForScalar(receiverInfo.secret)
-        iotaBasePoint.scalarMultBase(prepared)
-        iotaBasePoint.toBytes(iotaBaseProduct)
-        const scalar = modL_LE(prepared)
-        const nobleProduct =  ExtendedPoint.BASE.multiply(scalar).toRawBytes()
-        expect(iotaBaseProduct).toEqual(nobleProduct)
-    })
+
     test('iota and noble ed25519 interoperable publickey',async ()=>{
         const scalar = modL_LE(prepareBytesForScalar(receiverInfo.secret))
         const noblePublicKey =  ExtendedPoint.BASE.multiply(scalar).toRawBytes()

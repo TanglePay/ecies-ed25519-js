@@ -1,9 +1,6 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { prepareBytesForScalar, decapsulate, decrypt, encapsulate, encrypt, getEphemeralSecretAndPublicKey, productOfTwo } from '.';
-import { ExtendedPoint, etc, getPublicKeyAsync, modL_LE } from './nobleEd'
-import { ExtendedGroupElement } from './edwards25519/extendedGroupElement';
-import { Bip39 } from "@iota/crypto.js";
+import { decrypt, encrypt, getEphemeralSecretAndPublicKey } from '.';
 describe('entrypt decrypt test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
     let contentToBeEncrypted:string

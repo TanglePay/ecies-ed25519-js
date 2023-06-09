@@ -3,9 +3,7 @@ import { Bip39, Ed25519, Sha512 } from "@iota/crypto.js";
 import { ExtendedPoint, modL_LE, etc } from "./nobleEd";
 import CryptoJS from 'crypto-js'
 
-const SEED_LEN = 32
 const PUBLIC_KEY_LEN = 32
-const PRIVATE_KEY_LEN = 64
 const SHARED_LEN = 32
 
 export function prepareBytesForScalar(bytes:Uint8Array) {

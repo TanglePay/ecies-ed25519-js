@@ -1,3 +1,8 @@
-import {createRollupConfig} from "./template/rollup.config.mjs";
+import {createRollupConfig, decorateIifeExternal} from "./template/rollup.config.mjs";
 import pkg from './package.json' assert { type: "json" }
-export default createRollupConfig(pkg)
+
+const config = createRollupConfig(pkg)
+decorateIifeExternal(config[1],{
+    '@iota/crypto.js':'IotaCrypto'
+  })
+  export default config

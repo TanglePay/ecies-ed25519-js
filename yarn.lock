@@ -1075,7 +1075,7 @@
     "@iota/util.js" "2.0.0-rc.2"
     big-integer "^1.6.51"
 
-"@iota/util.js@2.0.0-rc.2", "@iota/util.js@^2.0.0-rc.2":
+"@iota/util.js@2.0.0-rc.2":
   version "2.0.0-rc.2"
   resolved "https://registry.yarnpkg.com/@iota/util.js/-/util.js-2.0.0-rc.2.tgz#488392e5a05a85703e3a611c2e0f11fb5db850f7"
   integrity sha512-c6n5LPiimwkz5aCKsMjRg3GKWzcK+zELmJK1AVaziLneJ8BsdZBKvWJyQGNqjREQjOhRaixizmZc3nGuihldnQ==
