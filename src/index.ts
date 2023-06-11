@@ -5,7 +5,7 @@ import CryptoJS from 'crypto-js'
 
 const PUBLIC_KEY_LEN = 32
 const SHARED_LEN = 32
-
+export const util = etc
 export function prepareBytesForScalar(bytes:Uint8Array) {
     bytes = bytes.slice(0,Ed25519.SEED_SIZE)
     if (bytes.length !== Ed25519.SEED_SIZE) throw new Error('Invalid seed length')
