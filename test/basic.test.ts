@@ -1,11 +1,15 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { prepareBytesForScalar, decapsulate, encapsulate, getEphemeralSecretAndPublicKey, productOfTwo } from '.';
-import { ExtendedPoint, etc, modL_LE } from './nobleEd';
-
+import { setCryptoJS, prepareBytesForScalar, decapsulate, encapsulate, getEphemeralSecretAndPublicKey, productOfTwo, setHkdf } from '../src';
+import { ExtendedPoint, etc, modL_LE } from '../src/nobleEd';
+import CryptoJS from 'crypto-js';
+import hkdf from 'futoin-hkdf';
+setHkdf(hkdf)
+setCryptoJS(CryptoJS)
 describe('basic test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
     const tag = 'IOTACAT'
+
     beforeEach(()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
     })

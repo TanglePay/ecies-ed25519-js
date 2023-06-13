@@ -2,11 +2,11 @@
   "extends": "./template/tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "./dist/types"
+    "outDir": "./dist"
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "test/aes.test.ts"  ],
   "exclude": [
     "node_modules",
     "dist"

@@ -1,6 +1,10 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { decrypt, encrypt, getEphemeralSecretAndPublicKey } from '.';
+import { decrypt, encrypt, getEphemeralSecretAndPublicKey, setCryptoJS, setHkdf } from '../src';
+import CryptoJS from 'crypto-js';
+import hkdf from 'futoin-hkdf';
+setHkdf(hkdf)
+setCryptoJS(CryptoJS)
 describe('entrypt decrypt test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
     let contentToBeEncrypted:string

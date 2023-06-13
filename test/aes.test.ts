@@ -1,13 +1,15 @@
 
 import { describe, expect, test } from '@jest/globals';
-import { aesEncrypt, aesDecrypt, getKeyAndIv } from '.';
+import { aesEncrypt, aesDecrypt, getKeyAndIv, setCryptoJS, setHkdf } from '../src';
 import { Bip39 } from '@iota/crypto.js';
 import CryptoJS from 'crypto-js';
-
+import hkdf from 'futoin-hkdf';
+setHkdf(hkdf)
+setCryptoJS(CryptoJS)
 describe('basic test for ecies ed25519',()=>{
     const basicContent = 'hehe'
     const basicAesKey = '12321321321321312'
-    
+
     test('test raw case',()=>{
         const encrypted = CryptoJS.AES.encrypt(basicContent,basicAesKey).toString()
         const decrypted = CryptoJS.AES.decrypt(encrypted,basicAesKey).toString(CryptoJS.enc.Utf8)
