@@ -1,10 +1,18 @@
 
 import { describe, expect, test } from '@jest/globals';
-import { aesEncrypt, aesDecrypt, getKeyAndIv, setCryptoJS, setHkdf } from '../src';
-import { Bip39 } from '@iota/crypto.js';
+import { aesEncrypt, aesDecrypt, getKeyAndIv, setCryptoJS, setHkdf, setIotaCrypto } from '../src';
+import { Bip39, Ed25519, Sha512 } from '@iota/crypto.js';
+setIotaCrypto({
+    Bip39,
+    Ed25519,
+    Sha512
+})
 import CryptoJS from 'crypto-js';
-import hkdf from 'futoin-hkdf';
-setHkdf(hkdf)
+import hkdf from 'js-crypto-hkdf';
+setHkdf(async (secret:Uint8Array, length:number, salt:Uint8Array)=>{
+    const res = await hkdf.compute(secret, 'SHA-256', length, '', salt)
+    return res.key;
+})
 setCryptoJS(CryptoJS)
 describe('basic test for ecies ed25519',()=>{
     const basicContent = 'hehe'

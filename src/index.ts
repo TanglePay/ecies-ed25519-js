@@ -1,11 +1,15 @@
-import type hkdf from "futoin-hkdf";
-import { Bip39, Ed25519, Sha512 } from "@iota/crypto.js";
+
+import type { Bip39, Ed25519, Sha512 } from "@iota/crypto.js";
 import { ExtendedPoint, modL_LE, etc } from "./nobleEd";
 import type CryptoJS from 'crypto-js'
 
 let _CryptoJS:typeof CryptoJS
-let _hkdf:typeof hkdf
-
+let _hkdf:(secret:Uint8Array, length:number, salt:Uint8Array)=>Promise<Uint8Array>
+let IotaCrypto:{
+    Bip39: typeof Bip39,
+    Ed25519: typeof Ed25519,
+    Sha512: typeof Sha512
+}
 const PUBLIC_KEY_LEN = 32
 const SHARED_LEN = 32
 
@@ -13,13 +17,27 @@ export const util = etc
 export const setCryptoJS = (instance:typeof CryptoJS) => {
     _CryptoJS = instance
 }
-export const setHkdf = (instance:typeof hkdf) => {
-    _hkdf = instance
+export const setIotaCrypto = (instance:{
+    Bip39: typeof Bip39,
+    Ed25519: typeof Ed25519,
+    Sha512: typeof Sha512
+}) => {
+    IotaCrypto = instance
+}
+export const setHkdf = (func:(secret:Uint8Array, length:number, salt:Uint8Array)=>Promise<Uint8Array>) => {
+    _hkdf = func
+}
+export const asciiToUint8Array = (str:string) => {
+    let uint8array = new Uint8Array(str.length);
+    for (let i = 0, len = str.length; i < len; i++) {
+        uint8array[i] = str.charCodeAt(i);
+    }
+    return uint8array;
 }
 export function prepareBytesForScalar(bytes:Uint8Array) {
-    bytes = bytes.slice(0,Ed25519.SEED_SIZE)
-    if (bytes.length !== Ed25519.SEED_SIZE) throw new Error('Invalid seed length')
-    const sha512 = new Sha512();
+    bytes = bytes.slice(0,IotaCrypto.Ed25519.SEED_SIZE)
+    if (bytes.length !== IotaCrypto.Ed25519.SEED_SIZE) throw new Error('Invalid seed length')
+    const sha512 = new IotaCrypto.Sha512();
     sha512.update(bytes);
 
     const digest = sha512.digest();
@@ -30,19 +48,19 @@ export function prepareBytesForScalar(bytes:Uint8Array) {
 }
 
 export const  getEphemeralSecretAndPublicKey = () => {
-    const mnemonic = Bip39.randomMnemonic(128)
+    const mnemonic = IotaCrypto.Bip39.randomMnemonic(128)
     
-    const ephemeralSecret = Bip39.mnemonicToSeed(mnemonic).slice(0, Ed25519.SEED_SIZE);
+    const ephemeralSecret = IotaCrypto.Bip39.mnemonicToSeed(mnemonic).slice(0, IotaCrypto.Ed25519.SEED_SIZE);
     
-    const ephemeralPrivateKey = Ed25519.privateKeyFromSeed(ephemeralSecret);
+    const ephemeralPrivateKey = IotaCrypto.Ed25519.privateKeyFromSeed(ephemeralSecret);
     
-    const ephemeralPublicKey = Ed25519.publicKeyFromPrivateKey(ephemeralPrivateKey);
+    const ephemeralPublicKey = IotaCrypto.Ed25519.publicKeyFromPrivateKey(ephemeralPrivateKey);
     return {
         secret:ephemeralSecret,
         publicKey:ephemeralPublicKey
     }
 }
-export const encapsulate = (ephemeralSecret:Uint8Array, ephemeralPublicKey:Uint8Array,receiverPublicKey:Uint8Array, tag:string = '') => {
+export const encapsulate = async (ephemeralSecret:Uint8Array, ephemeralPublicKey:Uint8Array,receiverPublicKey:Uint8Array, tag:Uint8Array) => {
 
     if (receiverPublicKey.length !== PUBLIC_KEY_LEN) {
         throw new Error("Receiver public key must be 32 bytes.")
@@ -50,9 +68,7 @@ export const encapsulate = (ephemeralSecret:Uint8Array, ephemeralPublicKey:Uint8
 
     // get product of two scalars
     const sharedSecret = productOfTwo(ephemeralSecret, receiverPublicKey)
-    const key = _hkdf(Buffer.concat([Buffer.from(ephemeralPublicKey),Buffer.from(sharedSecret)]), PUBLIC_KEY_LEN + SHARED_LEN, {
-        salt:tag
-    })
+    const key = await _hkdf(etc.concatBytes(ephemeralPublicKey,sharedSecret), PUBLIC_KEY_LEN + SHARED_LEN, tag)
     return key
 }
 export const productOfTwo = (secret:Uint8Array,publicKey:Uint8Array) => {
@@ -61,18 +77,16 @@ export const productOfTwo = (secret:Uint8Array,publicKey:Uint8Array) => {
     point = point.multiply(scalar)
     return point.toRawBytes()
 }
-export const decapsulate = (ephemeralPublicKey:Uint8Array, receiverSecret:Uint8Array,tag:string='') => {
+export const decapsulate = async (ephemeralPublicKey:Uint8Array, receiverSecret:Uint8Array,tag:Uint8Array) => {
     const sharedSecret = productOfTwo(receiverSecret, ephemeralPublicKey)
-    const key = _hkdf(Buffer.concat([Buffer.from(ephemeralPublicKey),Buffer.from(sharedSecret)]), PUBLIC_KEY_LEN + SHARED_LEN, {
-        salt:tag
-    })
+    const key = await _hkdf(etc.concatBytes(ephemeralPublicKey,sharedSecret), PUBLIC_KEY_LEN + SHARED_LEN, tag)
     return key
 }
 
-export const encrypt = (receiverPublicKey:Uint8Array,content:string,tag='')=>{
+export const encrypt = async (receiverPublicKey:Uint8Array,content:string,tag:Uint8Array)=>{
     const {secret, publicKey} = getEphemeralSecretAndPublicKey()
     
-    const aesKey = etc.bytesToHex(encapsulate(secret,publicKey,receiverPublicKey,tag))
+    const aesKey = etc.bytesToHex(await encapsulate(secret,publicKey,receiverPublicKey,tag))
     const encrypted = aesEncrypt(content, aesKey)
     return {
         ephemeralPublicKey:publicKey,
@@ -91,11 +105,11 @@ export const aesEncrypt = (content:string,aesKey:string) => {
     ).ciphertext.toString(_CryptoJS.enc.Base64)
     return encrypted
 }
-export const decrypt = (receiverSecret:Uint8Array, content:string,tag='') => {
+export const decrypt = async (receiverSecret:Uint8Array, content:string,tag:Uint8Array) => {
     const ephemeralPublicKeyHex = content.substring(0,64)
     const ephemeralPublicKey = etc.hexToBytes(ephemeralPublicKeyHex)
     const encrypted = content.substring(64)
-    const aesKey = etc.bytesToHex(decapsulate(ephemeralPublicKey,receiverSecret,tag))
+    const aesKey = etc.bytesToHex(await decapsulate(ephemeralPublicKey,receiverSecret,tag))
     const decrypted = aesDecrypt(encrypted,aesKey)
     return {
         ephemeralPublicKey,

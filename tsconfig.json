@@ -6,7 +6,7 @@
   },
   "include": [
     "src/**/*.ts"
-, "test/aes.test.ts"  ],
+  ],
   "exclude": [
     "node_modules",
     "dist"
