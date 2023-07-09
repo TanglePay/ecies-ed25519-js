@@ -47,7 +47,7 @@ export function prepareBytesForScalar(bytes:Uint8Array) {
     return digest.slice(0,32);
 }
 
-export const  getEphemeralSecretAndPublicKey = () => {
+export const getEphemeralSecretAndPublicKey = () => {
     const mnemonic = IotaCrypto.Bip39.randomMnemonic(128)
     
     const ephemeralSecret = IotaCrypto.Bip39.mnemonicToSeed(mnemonic).slice(0, IotaCrypto.Ed25519.SEED_SIZE);

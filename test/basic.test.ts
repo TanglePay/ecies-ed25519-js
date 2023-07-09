@@ -19,7 +19,7 @@ setHkdf(async (secret:Uint8Array, length:number, salt:Uint8Array)=>{
 setCryptoJS(CryptoJS)
 describe('basic test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
-    const tag = asciiToUint8Array('IOTACAT')
+    const tag = asciiToUint8Array('DUMMYTAG')
 
     beforeEach(()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()

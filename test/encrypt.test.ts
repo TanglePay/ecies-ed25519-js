@@ -29,7 +29,7 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         encrypted:string,
         payload:string
     }
-    const tag = asciiToUint8Array('IOTACAT')
+    const tag = asciiToUint8Array('DUMMYTAG')
     beforeEach(async ()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
         contentToBeEncrypted = 'hehe'//Bip39.randomMnemonic(128)
