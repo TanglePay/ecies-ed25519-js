@@ -13,6 +13,7 @@
     "@babel/preset-typescript": "^7.21.0",
     "@iota/crypto.js": "^2.0.0-rc.2",
     "@iota/iota.js": "^2.0.0-rc.4",
+    "@iota/util.js": "^2.0.0-rc.2",
     "@jest/globals": "^29.4.3",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^24.0.1",

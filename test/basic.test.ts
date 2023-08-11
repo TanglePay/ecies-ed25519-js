@@ -1,6 +1,6 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { setCryptoJS, prepareBytesForScalar, decapsulate, encapsulate, getEphemeralSecretAndPublicKey, productOfTwo, setHkdf, setIotaCrypto, asciiToUint8Array } from '../src';
+import { setCryptoJS, prepareBytesForScalar, decapsulate, encapsulate, getEphemeralSecretAndPublicKey, productOfTwo, setHkdf, setIotaCrypto } from '../src';
 import { ExtendedPoint, etc, modL_LE } from '../src/nobleEd';
 import { Converter } from '@iota/util.js';
 import { Bip39, Ed25519, Sha512, Bip32Path } from '@iota/crypto.js';
@@ -19,7 +19,7 @@ setHkdf(async (secret:Uint8Array, length:number, salt:Uint8Array)=>{
 setCryptoJS(CryptoJS)
 describe('basic test for ecies ed25519',()=>{
     let receiverInfo:{secret:Uint8Array,publicKey:Uint8Array}
-    const tag = asciiToUint8Array('DUMMYTAG')
+    const tag = Converter.utf8ToBytes('DUMMYTAG')
 
     beforeEach(()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()

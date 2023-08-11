@@ -27,13 +27,7 @@ export const setIotaCrypto = (instance:{
 export const setHkdf = (func:(secret:Uint8Array, length:number, salt:Uint8Array)=>Promise<Uint8Array>) => {
     _hkdf = func
 }
-export const asciiToUint8Array = (str:string) => {
-    let uint8array = new Uint8Array(str.length);
-    for (let i = 0, len = str.length; i < len; i++) {
-        uint8array[i] = str.charCodeAt(i);
-    }
-    return uint8array;
-}
+
 export function prepareBytesForScalar(bytes:Uint8Array) {
     bytes = bytes.slice(0,IotaCrypto.Ed25519.SEED_SIZE)
     if (bytes.length !== IotaCrypto.Ed25519.SEED_SIZE) throw new Error('Invalid seed length')
@@ -88,11 +82,12 @@ export const encrypt = async (receiverPublicKey:Uint8Array,content:string,tag:Ui
     
     const aesKey = etc.bytesToHex(await encapsulate(secret,publicKey,receiverPublicKey,tag))
     const encrypted = aesEncrypt(content, aesKey)
+    const encryptedBytes = etc.hexToBytes(encrypted)
     return {
         ephemeralPublicKey:publicKey,
         aesKey,
         encrypted,
-        payload:etc.bytesToHex(publicKey) + encrypted
+        payload:etc.bytesToHex(etc.concatBytes(publicKey,encryptedBytes))
     }
 }
 export const aesEncrypt = (content:string,aesKey:string) => {
@@ -102,7 +97,7 @@ export const aesEncrypt = (content:string,aesKey:string) => {
         contentWord,
         key,
         { iv, mode: _CryptoJS.mode.CBC, padding: _CryptoJS.pad.Pkcs7 }
-    ).ciphertext.toString(_CryptoJS.enc.Base64)
+    ).ciphertext.toString(_CryptoJS.enc.Hex)
     return encrypted
 }
 export const decrypt = async (receiverSecret:Uint8Array, content:string,tag:Uint8Array) => {
@@ -126,7 +121,7 @@ export const getKeyAndIv = (password:string)=>{
 }
 export const aesDecrypt = (encrypted:string,aesKey:string) => {
     const {key,iv} = getKeyAndIv(aesKey)
-    const encryptedWord = _CryptoJS.enc.Base64.parse(encrypted)
+    const encryptedWord = _CryptoJS.enc.Hex.parse(encrypted)
     const encryptedParam = _CryptoJS.lib.CipherParams.create({
         ciphertext: encryptedWord,
     })

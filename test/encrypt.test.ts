@@ -1,6 +1,6 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { decrypt, encrypt, getEphemeralSecretAndPublicKey, setCryptoJS, setHkdf, setIotaCrypto, asciiToUint8Array} from '../src';
+import { decrypt, encrypt, getEphemeralSecretAndPublicKey, setCryptoJS, setHkdf, setIotaCrypto} from '../src';
 import { Bip39, Ed25519, Sha512 } from '@iota/crypto.js';
 setIotaCrypto({
     Bip39,
@@ -9,6 +9,7 @@ setIotaCrypto({
 })
 import CryptoJS from 'crypto-js';
 import hkdf from 'js-crypto-hkdf';
+import { Converter } from '@iota/util.js';
 setHkdf(async (secret:Uint8Array, length:number, salt:Uint8Array)=>{
     const res = await hkdf.compute(secret, 'SHA-256', length, '',salt)
     return res.key;
@@ -29,7 +30,7 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         encrypted:string,
         payload:string
     }
-    const tag = asciiToUint8Array('DUMMYTAG')
+    const tag = Converter.utf8ToBytes('DUMMYTAG')
     beforeEach(async ()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
         contentToBeEncrypted = 'hehe'//Bip39.randomMnemonic(128)
