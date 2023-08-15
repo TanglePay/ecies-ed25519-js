@@ -1,6 +1,6 @@
 
 import { beforeEach, describe, expect, test } from '@jest/globals';
-import { decrypt, encrypt, getEphemeralSecretAndPublicKey, setCryptoJS, setHkdf, setIotaCrypto} from '../src';
+import { decrypt, encrypt, getEphemeralSecretAndPublicKey, setCryptoJS, setHkdf, setIotaCrypto, util} from '../src';
 import { Bip39, Ed25519, Sha512 } from '@iota/crypto.js';
 setIotaCrypto({
     Bip39,
@@ -22,12 +22,12 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         ephemeralPublicKey:Uint8Array,
         aesKey:string,
         encrypted:string,
-        payload:string
+        payload:Uint8Array
     }
     let decryptResult:{
         ephemeralPublicKey:Uint8Array,
         aesKey:string,
-        encrypted:string,
+        encrypted:Uint8Array,
         payload:string
     }
     const tag = Converter.utf8ToBytes('DUMMYTAG')
@@ -35,7 +35,7 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
         contentToBeEncrypted = 'hehe'//Bip39.randomMnemonic(128)
         encryptResult = await encrypt(receiverInfo.publicKey,contentToBeEncrypted,tag)
-        decryptResult = await decrypt(receiverInfo.secret,encryptResult.payload,tag)
+        decryptResult = await decrypt(receiverInfo.secret, encryptResult.payload,tag)
     })
     
     test('test ephemeralPublicKey equal',()=>{        
@@ -45,7 +45,7 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         expect(encryptResult.aesKey).toEqual(decryptResult.aesKey);
     })
     test('test encrypted',()=>{        
-        expect(encryptResult.encrypted).toEqual(decryptResult.encrypted);
+        expect(encryptResult.encrypted).toEqual(util.bytesToHex(decryptResult.encrypted));
     })
     test('test content equal after encrypt then decrypt',()=>{        
         expect(contentToBeEncrypted).toEqual(decryptResult.payload);
