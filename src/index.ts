@@ -150,8 +150,7 @@ export type EncryptedContent = {
 export type EncryptedPayload = {
     payload:Uint8Array,
 } & any;
-export const encryptPayloadList = async (param:{payloadList:EncryptingPayload[],tag:Uint8Array}) => {
-    const {payloadList,tag} = param
+export const encryptPayloadList = async ({payloadList,tag}:{payloadList:EncryptingPayload[],tag:Uint8Array}):Promise<EncryptedPayload[]> => {
     const pair = getEphemeralSecretAndPublicKey()
     const result:EncryptedPayload[] = []
     for (let i=0;i<payloadList.length;i++){
@@ -164,8 +163,7 @@ export const encryptPayloadList = async (param:{payloadList:EncryptingPayload[],
     return result
 }
 
-export const decryptOneOfList = async (param:{receiverSecret:Uint8Array, payloadList:EncryptedPayload[],tag:Uint8Array,idx:number}) => {
-    const {receiverSecret,payloadList,tag,idx} = param
+export const decryptOneOfList = async ({receiverSecret,payloadList,tag,idx}:{receiverSecret:Uint8Array, payloadList:EncryptedPayload[],tag:Uint8Array,idx:number}) => {
     const contentList:Uint8Array[] = []
     let ephemeralPublicKey:Uint8Array
     for (let i=0;i<payloadList.length;i++){
