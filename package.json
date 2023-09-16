@@ -49,7 +49,7 @@
     "clean": "rimraf dist",
     "build:type": "tsc",
     "build:source": "rollup --config rollup.config.mjs",
-    "build": "npm run clean && npm run build:type && npm run build:source",
+    "build": "pnpm run clean && pnpm run build:type && pnpm run build:source",
     "lint": "eslint src --fix --ext .ts,.js",
     "test": "jest"
   }
