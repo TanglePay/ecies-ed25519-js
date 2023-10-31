@@ -87,4 +87,18 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         const decrypted = await decryptOneOfList({payloadList:encryptResult,receiverSecret:randomPair.privateKey,tag, idx:randomIndex})
         expect(decrypted.payload).toEqual(contentToBeEncrypted)
     })
+    test('test encrypt a list then decrypt random one of it with fixed content and pair',async ()=>{
+        const pairs:{mkey:string, addr:string,privateKey:Uint8Array}[] = [{
+            mkey:"0x3ff5652902770c77d5fe8ff7bc6902c9c14646a73fa500f5e304e24c83db5c15",
+            addr:"65e28f9b0090daa5bbf9cde6aa12b3a1c50d13f2",
+            privateKey:Converter.hexToBytes("0x4782c4ec671736f1d649d5b5998e883e025b9b9aac5509c9250ceacd94c70fbbecfb4a3ebb662b8294b3a5d2da8cd4d4f6f9a2a87e979cedc0f2de24a607d3c3")
+        }]
+        const contentToBeEncrypted = 'ZK@%FH_SCw!IzxE6Mf%Xvjpu1@LboluI'
+        const encryptingPayloadList = pairs.map(pair=>({addr:pair.addr,publicKey:Converter.hexToBytes(pair.mkey),content:contentToBeEncrypted}))
+        const encryptResult = await encryptPayloadList({payloadList:encryptingPayloadList,tag})
+        const randomIndex = Math.floor(Math.random()*encryptingPayloadList.length)
+        const randomPair = pairs[randomIndex]
+        const decrypted = await decryptOneOfList({payloadList:encryptResult,receiverSecret:randomPair.privateKey,tag, idx:randomIndex})
+        expect(decrypted.payload).toEqual(contentToBeEncrypted)
+    })
 })
