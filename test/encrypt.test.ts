@@ -11,6 +11,7 @@ import CryptoJS from 'crypto-js';
 import hkdf from 'js-crypto-hkdf';
 import { Converter } from '@iota/util.js';
 import { Ed25519Seed, generateBip44Address, COIN_TYPE_SHIMMER,Ed25519Address,Bech32Helper,ED25519_ADDRESS_TYPE } from '@iota/iota.js';
+import { generatePublicKeyAndAddressPair } from './shared';
 setHkdf(async (secret:Uint8Array, length:number, salt:Uint8Array)=>{
     const res = await hkdf.compute(secret, 'SHA-256', length, '',salt)
     return res.key;
@@ -32,28 +33,7 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         payload:string
     }
     const tag = Converter.utf8ToBytes('DUMMYTAG')
-    const generatePublicKeyAndAddressPair = () => {
-        const mnemonic = Bip39.randomMnemonic(128)
-        const seed = Ed25519Seed.fromMnemonic(mnemonic)
-        const accountState = {
-            accountIndex: 0,
-            addressIndex: 0,
-            isInternal: false
-        }
-        let path = generateBip44Address(accountState,COIN_TYPE_SHIMMER)
-        const addressSeed = seed.generateSeedFromPath(new Bip32Path(path))
-        const addressKeyPair = addressSeed.keyPair()
-        const publicKey = addressKeyPair.publicKey
-        const publicKeyHex = Converter.bytesToHex(publicKey,true)
-        const genesisEd25519Address = new Ed25519Address(publicKey);
-        const genesisWalletAddress = genesisEd25519Address.toAddress();
-        const accountBech32Address = Bech32Helper.toBech32(ED25519_ADDRESS_TYPE, genesisWalletAddress, 'smr');
-        return {
-            mkey:publicKeyHex,
-            addr:accountBech32Address,
-            privateKey: addressKeyPair.privateKey
-        }
-    }
+
     beforeEach(async ()=>{
         receiverInfo = getEphemeralSecretAndPublicKey()
         contentToBeEncrypted = 'hehe'//Bip39.randomMnemonic(128)
@@ -88,17 +68,14 @@ describe('entrypt decrypt test for ecies ed25519',()=>{
         expect(decrypted.payload).toEqual(contentToBeEncrypted)
     })
     test('test encrypt a list then decrypt random one of it with fixed content and pair',async ()=>{
-        const pairs:{mkey:string, addr:string,privateKey:Uint8Array}[] = [{
-            mkey:"0x3ff5652902770c77d5fe8ff7bc6902c9c14646a73fa500f5e304e24c83db5c15",
-            addr:"65e28f9b0090daa5bbf9cde6aa12b3a1c50d13f2",
-            privateKey:Converter.hexToBytes("0x4782c4ec671736f1d649d5b5998e883e025b9b9aac5509c9250ceacd94c70fbbecfb4a3ebb662b8294b3a5d2da8cd4d4f6f9a2a87e979cedc0f2de24a607d3c3")
-        }]
+        const pairs:{mkey:string, addr:string,privateKey:Uint8Array}[] = [generatePublicKeyAndAddressPair()]
         const contentToBeEncrypted = 'ZK@%FH_SCw!IzxE6Mf%Xvjpu1@LboluI'
         const encryptingPayloadList = pairs.map(pair=>({addr:pair.addr,publicKey:Converter.hexToBytes(pair.mkey),content:contentToBeEncrypted}))
         const encryptResult = await encryptPayloadList({payloadList:encryptingPayloadList,tag})
         const randomIndex = Math.floor(Math.random()*encryptingPayloadList.length)
         const randomPair = pairs[randomIndex]
         const decrypted = await decryptOneOfList({payloadList:encryptResult,receiverSecret:randomPair.privateKey,tag, idx:randomIndex})
+        console.log('test encrypt a list then decrypt random one of it with fixed content and pair',decrypted)
         expect(decrypted.payload).toEqual(contentToBeEncrypted)
     })
 })
