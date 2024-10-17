@@ -53,7 +53,7 @@ export function createRollupConfig(pkg) {
                 banner
             },
             {
-              file: 'dist/cjs/index.js', // The CommonJS bundle
+              file: 'dist/cjs/index.cjs', // The CommonJS bundle
               format: 'cjs',
               sourcemap: true,
               banner
